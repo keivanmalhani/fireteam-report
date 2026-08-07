@@ -119,8 +119,9 @@ describe('renderMatrix', () => {
     players[0] = { ...players[0], problem: 'private', clears: {} };
     const host = document.createElement('div');
     host.append(renderMatrix(FALLBACK_ACTIVITIES, players));
-    const firstCell = host.querySelector('table.matrix tbody tr:nth-child(2) td .cell');
+    const firstCell = host.querySelector('table.matrix tbody tr:nth-child(2) td');
     expect(firstCell?.textContent).toBe('?');
+    expect(firstCell?.className).toContain('private');
   });
 
   it('asks for players when the fireteam is empty', () => {
@@ -214,10 +215,14 @@ describe('mounting the whole app', () => {
     }
   });
 
-  it('offers the permalink and Discord buttons', async () => {
+  it('offers the permalink, Discord and card buttons', async () => {
     const root = await mountApp();
     expect(root.querySelector('#copy-link')).not.toBeNull();
     expect(root.querySelector('#copy-discord')).not.toBeNull();
+    // The label is the accessible name, so it has to say what comes out.
+    expect(root.querySelector('#download-card')?.textContent).toBe(
+      'Download the card, 1200x630'
+    );
   });
 });
 

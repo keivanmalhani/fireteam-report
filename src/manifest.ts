@@ -21,6 +21,14 @@ import type { ActivityGroup, RawActivityDef } from './types';
 const BUNGIE_ROOT = 'https://www.bungie.net';
 const MANIFEST_URL = BUNGIE_ROOT + '/Platform/Destiny2/Manifest/';
 const MAX_ATTEMPTS = 4;
+/** Deadline for one attempt at the small manifest metadata call. */
+const MANIFEST_TIMEOUT_MS = 6000;
+/** Total time the manifest call may take, retries included. */
+const MANIFEST_BUDGET_MS = 12000;
+/** The definition file is about 11 MB, so one attempt gets longer. */
+const DEFINITIONS_TIMEOUT_MS = 45000;
+/** Total time the definition download may take, retries included. */
+const DEFINITIONS_BUDGET_MS = 60000;
 
 export type ActivitySource = 'network' | 'cache' | 'fallback';
 
@@ -85,22 +93,68 @@ export function clearManifestCache(): void {
   storage()?.removeItem(STORAGE_KEY_MANIFEST);
 }
 
-async function fetchJson<T>(url: string, key: string): Promise<T> {
+/**
+ * One fetch with a hard deadline.
+ *
+ * A request that is refused fails fast, but a request that is accepted and then
+ * never answered will hang forever, and a hung fetch never reaches the fallback
+ * so the page sits on a spinner. Captive portals and flaky mobile connections
+ * do exactly this, so every request gets a deadline.
+ */
+async function fetchWithTimeout(
+  url: string,
+  headers: Record<string, string>,
+  timeoutMs: number
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { headers, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Retries against an overall budget rather than a per attempt one.
+ *
+ * The retry exists for the intermittent ApiKeyMissingFromRequest, which comes
+ * back immediately, so four attempts cost almost nothing in that case. A hang
+ * is different: four attempts at the per request deadline would leave someone
+ * watching a spinner for half a minute. The budget caps the whole thing, so
+ * the common case still retries properly and the bad case gives up quickly.
+ */
+async function fetchJson<T>(
+  url: string,
+  key: string,
+  timeoutMs: number,
+  budgetMs: number
+): Promise<T> {
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (key) headers['X-API-Key'] = key;
+  const deadline = Date.now() + budgetMs;
 
   let last: Error = new Error('Request failed');
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) break;
     try {
-      const response = await fetch(url, { headers });
+      const response = await fetchWithTimeout(url, headers, Math.min(timeoutMs, remaining));
       const body = (await response.json()) as T & { ErrorCode?: number; ErrorStatus?: string };
       const code = body?.ErrorCode;
       if (response.ok && (code === undefined || code === 1)) return body;
       last = new Error(code ? 'Bungie error ' + code + ' ' + (body.ErrorStatus ?? '') : 'HTTP ' + response.status);
     } catch (err) {
-      last = err instanceof Error ? err : new Error(String(err));
+      last =
+        err instanceof Error && err.name === 'AbortError'
+          ? new Error('bungie.net did not answer in time.')
+          : err instanceof Error
+            ? err
+            : new Error(String(err));
     }
-    await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+    const backoff = Math.min(300 * (attempt + 1), Math.max(0, deadline - Date.now()));
+    if (backoff <= 0) break;
+    await new Promise((r) => setTimeout(r, backoff));
   }
   throw last;
 }
@@ -116,7 +170,12 @@ export async function loadActivityCatalog(): Promise<ActivityCatalog> {
   let version: string;
   let definitionPath: string;
   try {
-    const manifest = await fetchJson<ManifestResponse>(MANIFEST_URL, key);
+    const manifest = await fetchJson<ManifestResponse>(
+      MANIFEST_URL,
+      key,
+      MANIFEST_TIMEOUT_MS,
+      MANIFEST_BUDGET_MS
+    );
     const v = manifest.Response?.version;
     const path = manifest.Response?.jsonWorldComponentContentPaths?.en?.DestinyActivityDefinition;
     if (!v || !path) throw new Error('Manifest did not include an activity definition path.');
@@ -139,7 +198,12 @@ export async function loadActivityCatalog(): Promise<ActivityCatalog> {
   }
 
   try {
-    const defs = await fetchJson<Record<string, RawActivityDef>>(BUNGIE_ROOT + definitionPath, key);
+    const defs = await fetchJson<Record<string, RawActivityDef>>(
+      BUNGIE_ROOT + definitionPath,
+      key,
+      DEFINITIONS_TIMEOUT_MS,
+      DEFINITIONS_BUDGET_MS
+    );
     const groups = collapseActivities(Object.values(defs));
     if (groups.length === 0) throw new Error('No raids or dungeons found in the manifest.');
     writeCache({ version, groups });

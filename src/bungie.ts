@@ -85,10 +85,15 @@ interface RequestOptions {
   body?: unknown;
   /** Bungie occasionally answers a keyless manifest call with 2102. */
   retries?: number;
+  /** Hard deadline. A hung request would otherwise leave the UI spinning. */
+  timeoutMs?: number;
 }
 
+/** Default deadline for a per player call. */
+export const REQUEST_TIMEOUT_MS = 15000;
+
 async function platformFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { key = '', method = 'GET', body, retries = 0 } = options;
+  const { key = '', method = 'GET', body, retries = 0, timeoutMs = REQUEST_TIMEOUT_MS } = options;
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (key) headers['X-API-Key'] = key;
   if (body !== undefined) headers['Content-Type'] = 'application/json';
@@ -96,11 +101,19 @@ async function platformFetch<T>(path: string, options: RequestOptions = {}): Pro
   let lastError: unknown;
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
-      const response = await fetch(API_ROOT + path, {
-        method,
-        headers,
-        ...(body === undefined ? {} : { body: JSON.stringify(body) })
-      });
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      let response: Response;
+      try {
+        response = await fetch(API_ROOT + path, {
+          method,
+          headers,
+          signal: controller.signal,
+          ...(body === undefined ? {} : { body: JSON.stringify(body) })
+        });
+      } finally {
+        clearTimeout(timer);
+      }
 
       let payload: PlatformResponse<T> | null = null;
       try {
@@ -123,9 +136,12 @@ async function platformFetch<T>(path: string, options: RequestOptions = {}): Pro
       if (!retryable || attempt === retries) throw error;
       lastError = error;
     } catch (err) {
-      if (err instanceof BungieError && attempt === retries) throw err;
-      lastError = err;
-      if (attempt === retries) throw err;
+      const wrapped =
+        err instanceof Error && err.name === 'AbortError'
+          ? new BungieError('bungie.net did not answer in time.', 0, 0)
+          : err;
+      if (attempt === retries) throw wrapped;
+      lastError = wrapped;
     }
     await new Promise((r) => setTimeout(r, 250 * (attempt + 1)));
   }

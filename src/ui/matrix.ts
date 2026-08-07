@@ -75,7 +75,10 @@ function renderTable(groups: ActivityGroup[], players: PlayerStats[]): HTMLEleme
           ),
           ...players.map((p) => {
             const { text, cls } = cellText(p, group.name);
-            return el('td', {}, el('span', { class: 'cell ' + cls, text }));
+            // The heat colour goes on the cell itself, not on an inner span,
+            // so it fills the whole row height even when the activity name
+            // carries a second line of tier text.
+            return el('td', { class: cls }, el('span', { class: 'cell', text }));
           })
         )
       );
@@ -152,7 +155,7 @@ export function renderMatrix(groups: ActivityGroup[], players: PlayerStats[]): D
 
 export function renderLegend(): HTMLElement {
   const swatch = (cls: string, label: string) =>
-    el('span', { class: 'legend' }, el('i', { class: 'cell ' + cls }), label);
+    el('span', { class: 'legend' }, el('i', { class: cls }), label);
   return el(
     'div',
     { class: 'legend', style: 'gap:14px' },

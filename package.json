@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "derive": "node scripts/derive-activities.mjs"
+    "derive": "node scripts/derive-activities.mjs",
+    "ascii": "LC_ALL=C grep -rnI '[^\t -~]' . --exclude-dir=node_modules --exclude-dir=dist --exclude-dir=.git; test $? -eq 1"
   },
   "devDependencies": {
     "jsdom": "^30.0.1",

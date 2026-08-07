@@ -3,11 +3,17 @@
  */
 
 import { formatBungieName } from '../bungiename';
+import { buildCardModel, renderCardPng } from '../card';
 import { buildDiscordSummary } from '../discord';
 import { fetchPlayerStats, getApiKey, hasApiKey } from '../bungie';
 import { loadActivityCatalog, type ActivityCatalog } from '../manifest';
 import { buildShareUrl, decodeFireteam, encodeFireteam } from '../permalink';
-import { recommend, type MatrixRow } from '../recommend';
+import {
+  diversifyRecommendations,
+  recommend,
+  type MatrixRow,
+  type Recommendation
+} from '../recommend';
 import { demoBlurbs, demoPlayers } from '../demo';
 import { clear, el, qs } from './dom';
 import { createKeyModal, openKeyModal } from './keymodal';
@@ -60,6 +66,7 @@ export function mount(root: HTMLElement): void {
   qs<HTMLButtonElement>('#open-key').addEventListener('click', () => openKeyModal(keyDialog));
   qs<HTMLButtonElement>('#copy-link').addEventListener('click', copyLink);
   qs<HTMLButtonElement>('#copy-discord').addEventListener('click', copyDiscord);
+  qs<HTMLButtonElement>('#download-card').addEventListener('click', () => void downloadCard());
 
   window.addEventListener('hashchange', () => {
     const refs = decodeFireteam(location.hash);
@@ -183,19 +190,56 @@ export function mount(root: HTMLElement): void {
     await copyText(url, '#copy-link', 'Link copied');
   }
 
+  /**
+   * The picks in the order the page shows them. Everything that leaves this
+   * site shares it, so the paste and the card match what people are looking at
+   * while they read it out.
+   */
+  function shareRecommendations(): Recommendation[] {
+    if (!state.catalog) return [];
+    const usable = state.players.filter((p) => !p.problem);
+    return diversifyRecommendations(
+      recommend(
+        toMatrixRows(state.catalog.groups, state.players),
+        usable.map((p) => p.ref.name)
+      )
+    );
+  }
+
   async function copyDiscord(): Promise<void> {
     if (!state.catalog) return;
-    const usable = state.players.filter((p) => !p.problem);
-    const recs = recommend(
-      toMatrixRows(state.catalog.groups, state.players),
-      usable.map((p) => p.ref.name)
-    );
     const text = buildDiscordSummary({
-      recommendations: recs,
+      recommendations: shareRecommendations(),
       players: state.players,
       shareUrl: buildShareUrl(location.href, currentRefs())
     });
     await copyText(text, '#copy-discord', 'Summary copied');
+  }
+
+  async function downloadCard(): Promise<void> {
+    if (!state.catalog) return;
+    const button = qs<HTMLButtonElement>('#download-card');
+    const original = button.textContent ?? '';
+    try {
+      const blob = await renderCardPng(
+        buildCardModel({
+          recommendations: shareRecommendations(),
+          players: state.players
+        })
+      );
+      const url = URL.createObjectURL(blob);
+      const link = el('a', { href: url, download: 'fireteam-report.png' });
+      link.click();
+      // Revoking straight away cancels the save in some browsers, so the URL
+      // is held for a moment before it is let go.
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      button.textContent = 'Card saved';
+    } catch {
+      button.textContent = 'Card failed';
+    }
+    setTimeout(() => {
+      button.textContent = original;
+    }, 1600);
   }
 
   async function copyText(text: string, selector: string, done: string): Promise<void> {
@@ -360,13 +404,20 @@ function buildSkeleton(): DocumentFragment {
         class: 'section-note',
         text:
           'The fireteam is encoded in the link, so anyone who opens it sees the same ' +
-          'team. There is no server and nothing is stored anywhere but your browser.'
+          'team. There is no server and nothing is stored anywhere but your browser. ' +
+          'The card is an image of the top pick, sized to unfurl in a chat.'
       }),
       el(
         'div',
         { class: 'team-actions', style: 'border-top:none;padding-top:6px' },
         el('button', { class: 'btn', id: 'copy-link', type: 'button', text: 'Copy permalink' }),
-        el('button', { class: 'btn', id: 'copy-discord', type: 'button', text: 'Copy for Discord' })
+        el('button', { class: 'btn', id: 'copy-discord', type: 'button', text: 'Copy for Discord' }),
+        el('button', {
+          class: 'btn',
+          id: 'download-card',
+          type: 'button',
+          text: 'Download the card, 1200x630'
+        })
       )
     )
   );

@@ -24,6 +24,7 @@ Put two to six Bungie Names in, and you get:
 - per player totals, distinct raids cleared, and the activity they run most
 - a link that loads the same fireteam for anyone you paste it to
 - a plain text summary sized for a Discord message
+- a 1200x630 share card of the top pick, which is also the site's og:image
 
 ## The recommendations
 
@@ -40,6 +41,14 @@ The ranking is the point. It is an opinion, not a sort:
 Sherpa runs rank first, then everyone's first, then speedruns. Rusty and
 lopsided sit below those because they are warnings, not suggestions. The site
 says this on the page too, so the order is not a black box.
+
+The displayed list will not show the same verdict more than twice in a row; it
+pulls the next different verdict up instead. A fireteam runs one thing tonight,
+so the fourth best sherpa run tells you almost nothing the first one did not,
+while the best speedrun tells you something new. This is display order only,
+kept in a separate function from the ranking: it never changes which activities
+are recommended or what verdict each one gets, and the order inside a verdict
+is preserved.
 
 The engine is a pure function in `src/recommend.ts`. It takes a matrix of
 numbers and returns ranked recommendations. It does no fetching, so it is
@@ -133,12 +142,21 @@ npm test          # vitest
 npm run build     # typecheck and bundle to dist/
 npm run dev       # local dev server
 npm run derive    # refetch the manifest and regenerate the fallback table
+npm run ascii     # fail on any non-ascii byte in a text file
 ```
 
 `npm run derive` fetches the live manifest, rewrites
 `src/fallback-activities.ts` and `fixtures/activity-defs.json`, and prints the
 counts it derived. Run it when Bungie ships a new raid if you want the
 committed snapshot to match.
+
+The share card is rendered to `public/og.png` by `scripts/render-og.mjs`,
+which is deliberately outside the build because it needs a native canvas:
+
+```
+npm install --no-save @napi-rs/canvas
+node scripts/render-og.mjs
+```
 
 ## Layout
 
@@ -150,6 +168,7 @@ src/
   bungiename.ts          Name#1234 parsing (pure)
   aggregate.ts           summing stats across characters (pure)
   discord.ts             the copy for Discord text (pure)
+  card.ts                the 1200x630 share card, layout and drawing (pure layout)
   manifest.ts            manifest fetch, version keyed cache, fallback
   bungie.ts              API client and per player lookup
   fallback-activities.ts generated snapshot, do not edit by hand
@@ -160,7 +179,9 @@ fixtures/
   activity-defs.json     real raid and dungeon definitions, for the tests
   demo.json              the six player demo fireteam
 tests/                   vitest suite
-scripts/                 manifest derivation and demo generation
+public/
+  og.png                 the demo fireteam's card, rendered by hand
+scripts/                 manifest derivation, demo generation, og image
 ```
 
 The pure modules hold everything worth testing and none of them import `fetch`.
@@ -179,6 +200,17 @@ The pure modules hold everything worth testing and none of them import `fetch`.
   github.io call the API directly with no backend.
 - A Destiny account holds up to three characters and aggregate stats are
   reported per character, so clears are summed across all of them.
+- Every request has a deadline and the retry loop has an overall budget. A
+  refused connection fails fast, but a connection that is accepted and then
+  never answered would otherwise hang forever and never reach the fallback,
+  which leaves the page on a spinner with no way out. Captive portals and flaky
+  mobile connections do exactly that.
+
+## Security
+
+See [SECURITY.md](SECURITY.md). Short version: report privately through the
+Security tab, there is no server and no key of its own, and the most recent
+tagged release is what is supported.
 
 ## Licence
 

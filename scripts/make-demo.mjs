@@ -14,47 +14,62 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
+/**
+ * Six people with overlapping but distinct histories, which is what a real
+ * group looks like. Nobody is a blank sheet: the veteran skipped the newer
+ * dungeons, the dungeon regular is light on raids, the returning player never
+ * saw the sunset content. That is what makes different people the missing one
+ * on different activities instead of the same person every time.
+ */
 const PLAYERS = [
-  { name: 'Wraith', code: 4417, blurb: 'day one raider, has cleared everything' },
-  { name: 'Kestrel', code: 912, blurb: 'reliable weekly regular' },
-  { name: 'Ovid', code: 7731, blurb: 'came back for the newest expansion' },
-  { name: 'Marrow', code: 2208, blurb: 'plays most weeks' },
-  { name: 'Solene', code: 1145, blurb: 'newer, still filling in the back catalogue' },
-  { name: 'Tidebreaker', code: 6690, blurb: 'joined the clan last month' }
+  { name: 'Wraith', code: 4417, blurb: 'day one raider, took a long break, skipped the newer dungeons' },
+  { name: 'Kestrel', code: 912, blurb: 'dungeon regular, lighter on raids' },
+  { name: 'Ovid', code: 7731, blurb: 'came back for the newest expansion, never saw the sunset raids' },
+  { name: 'Marrow', code: 2208, blurb: 'steady all rounder, plays most weeks' },
+  { name: 'Solene', code: 1145, blurb: 'newer, filling in the back catalogue' },
+  { name: 'Tidebreaker', code: 6690, blurb: 'joined last month, keen raider' }
 ];
 
-/** Clears per activity, in the same player order as PLAYERS. */
+/**
+ * Clears per activity, in the same player order as PLAYERS.
+ *
+ * These are set by hand, not generated, because the demo has a job to do: the
+ * ranked list has to show what the engine can actually say. Every rule fires,
+ * the sherpa runs name three different people, and both warnings appear.
+ * tests/fixtures.test.ts asserts those properties, so an edit that makes this
+ * monotonous again fails the suite.
+ */
 const CLEARS = {
   // raids
-  "Crota's End":                    [20, 2, 2, 2, 1, 1],
-  'Crown of Sorrow':                [2, 2, 0, 0, 0, 0],
-  'Deep Stone Crypt':               [18, 14, 12, 9, 5, 3],
-  'Garden of Salvation':            [11, 7, 6, 4, 1, 0],
-  "King's Fall":                    [16, 12, 9, 7, 6, 5],
-  'Last Wish':                      [31, 24, 19, 15, 9, 6],
-  'Leviathan':                      [14, 9, 0, 6, 0, 0],
-  'Leviathan, Eater of Worlds':     [5, 3, 0, 2, 0, 0],
-  'Leviathan, Spire of Stars':      [3, 2, 0, 1, 0, 0],
-  'Root of Nightmares':             [13, 9, 8, 5, 2, 0],
-  "Salvation's Edge":               [9, 6, 4, 3, 2, 0],
-  'Scourge of the Past':            [5, 3, 0, 2, 0, 0],
-  'Vault of Glass':                 [24, 17, 15, 11, 6, 4],
-  'Vow of the Disciple':            [12, 8, 7, 5, 3, 1],
+  "Crota's End":                    [22, 3, 2, 2, 1, 1],   // lopsided: Wraith farmed the sword
+  'Crown of Sorrow':                [4, 2, 0, 3, 0, 0],
+  'Deep Stone Crypt':               [16, 11, 8, 9, 6, 4],
+  'Garden of Salvation':            [12, 8, 5, 7, 3, 2],
+  "King's Fall":                    [14, 9, 7, 8, 6, 4],
+  'Last Wish':                      [28, 19, 12, 16, 9, 7], // speedrun
+  'Leviathan':                      [13, 7, 0, 6, 0, 0],
+  'Leviathan, Eater of Worlds':     [6, 3, 0, 3, 0, 0],
+  'Leviathan, Spire of Stars':      [5, 2, 0, 3, 0, 0],
+  'Root of Nightmares':             [2, 1, 1, 2, 1, 1],    // rusty: everyone did it once at launch
+  "Salvation's Edge":               [5, 4, 7, 6, 0, 3],    // sherpa: Solene
+  'Scourge of the Past':            [7, 4, 0, 4, 0, 0],
+  'Vault of Glass':                 [24, 15, 11, 13, 9, 0], // sherpa: Tidebreaker
+  'Vow of the Disciple':            [11, 7, 6, 8, 4, 3],
   // pantheon
-  'The Pantheon: Atraks Sovereign': [3, 2, 1, 0, 0, 0],
-  'The Pantheon: Nezarec Sublime':  [1, 1, 1, 1, 1, 0],
-  'The Pantheon: Oryx Exalted':     [4, 3, 2, 2, 1, 0],
-  'The Pantheon: Rhulk Indomitable':[3, 2, 2, 1, 0, 0],
+  'The Pantheon: Atraks Sovereign': [4, 2, 0, 3, 0, 0],
+  'The Pantheon: Nezarec Sublime':  [3, 2, 0, 2, 0, 0],
+  'The Pantheon: Oryx Exalted':     [5, 3, 0, 3, 0, 0],
+  'The Pantheon: Rhulk Indomitable':[4, 3, 0, 2, 0, 0],
   // dungeons
-  'Duality':                        [14, 9, 7, 5, 5, 5],
-  'Equilibrium':                    [0, 0, 0, 0, 0, 0],
-  'Ghosts of the Deep':             [2, 1, 1, 1, 1, 1],
-  'Grasp of Avarice':               [17, 11, 8, 6, 6, 5],
-  'Pit of Heresy':                  [8, 5, 4, 3, 2, 1],
-  'Prophecy':                       [21, 13, 10, 8, 7, 6],
-  'Spire of the Watcher':           [6, 4, 3, 2, 1, 1],
-  'The Shattered Throne':           [19, 12, 9, 7, 4, 2],
-  "Warlord's Ruin":                 [7, 4, 3, 2, 1, 0]
+  'Duality':                        [9, 16, 5, 7, 4, 3],
+  'Equilibrium':                    [0, 0, 0, 0, 0, 0],    // everyone's first: the new dungeon
+  'Ghosts of the Deep':             [0, 14, 6, 5, 4, 3],   // sherpa: Wraith, who skipped it
+  'Grasp of Avarice':               [4, 31, 3, 5, 2, 2],   // lopsided: Kestrel farmed Gjallarhorn
+  'Pit of Heresy':                  [6, 12, 4, 5, 3, 2],
+  'Prophecy':                       [17, 22, 9, 11, 8, 6], // speedrun
+  'Spire of the Watcher':           [1, 2, 1, 1, 1, 1],    // rusty: nobody likes it
+  'The Shattered Throne':           [15, 18, 7, 9, 5, 4],
+  "Warlord's Ruin":                 [3, 9, 5, 6, 4, 2]
 };
 
 const defs = JSON.parse(readFileSync(join(ROOT, 'fixtures', 'activity-defs.json'), 'utf8'));

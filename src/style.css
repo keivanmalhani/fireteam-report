@@ -327,7 +327,8 @@ table.matrix tbody tr:hover td { background-color: #171b22; }
   border-bottom: 1px solid var(--line) !important;
 }
 
-/* count heat ramp: dark for none, brighter for many */
+/* count heat ramp: dark for none, brighter for many.
+   The class sits on the td so the tint fills the full row height. */
 .cell { display: block; padding: 9px 6px; }
 .h0 { color: var(--text-faint); background: transparent; }
 .h1 { color: #b9d8cc; background: rgba(79, 195, 173, 0.07); }
@@ -335,7 +336,7 @@ table.matrix tbody tr:hover td { background-color: #171b22; }
 .h3 { color: #cdeadb; background: rgba(79, 195, 173, 0.21); }
 .h4 { color: #d9f2e4; background: rgba(79, 195, 173, 0.30); }
 .h5 { color: #0c1512; background: rgba(79, 195, 173, 0.66); font-weight: 600; }
-.cell.private { color: var(--warn); }
+.private { color: var(--warn); }
 
 /* ---------- matrix (stacked cards, phones) ---------- */
 
@@ -475,3 +476,12 @@ footer.foot .row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: s
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* verdict tally above the ranked cards */
+.rec-tally {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 14px; font-size: 0.78rem; color: var(--text-faint);
+}
+.rec-tally > span { color: var(--kind, var(--text-faint)); white-space: nowrap; }
+.rec-tally b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.rec-tally .sep { color: var(--line); }

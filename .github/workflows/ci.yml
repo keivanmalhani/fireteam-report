@@ -33,9 +33,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      # -I skips binary files. public/og.png is a PNG, so without it this step
+      # reports the share card as a wall of non-ascii bytes and fails.
       - name: Check for non-ascii characters
         run: |
-          if LC_ALL=C grep -rnP '[^\x09\x20-\x7e]' . \
+          if LC_ALL=C grep -rnPI '[^\x09\x20-\x7e]' . \
               --exclude-dir=node_modules \
               --exclude-dir=dist \
               --exclude-dir=.git; then

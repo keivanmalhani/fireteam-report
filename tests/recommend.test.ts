@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  diversifyRecommendations,
   isEveryonesFirst,
   isLopsided,
   isRusty,
   isSherpa,
   isSpeedrun,
   recommend,
+  tallyKinds,
+  tallyLabel,
   RUSTY_MAX_AVERAGE,
   SPEEDRUN_MIN_CLEARS,
   type MatrixRow
@@ -252,5 +255,151 @@ describe('ranking', () => {
   it('is a pure function, so the same input gives the same output', () => {
     const rows = [row('A', [4, 3, 2, 1, 1, 0]), row('B', [0, 0, 0, 0, 0, 0])];
     expect(recommend(rows, SIX)).toEqual(recommend(rows, SIX));
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* display order                                                       */
+/* ------------------------------------------------------------------ */
+
+describe('diversifyRecommendations', () => {
+  const kinds = (recs: { kind: string }[]) => recs.map((r) => r.kind);
+
+  it('breaks up a run of more than two identical verdicts', () => {
+    const recs = recommend(
+      [
+        row('S1', [9, 8, 7, 6, 5, 0]),
+        row('S2', [8, 7, 6, 5, 4, 0]),
+        row('S3', [7, 6, 5, 4, 3, 0]),
+        row('F1', [0, 0, 0, 0, 0, 0])
+      ],
+      SIX
+    );
+    expect(kinds(recs)).toEqual(['sherpa', 'sherpa', 'sherpa', 'first']);
+    expect(kinds(diversifyRecommendations(recs))).toEqual([
+      'sherpa',
+      'sherpa',
+      'first',
+      'sherpa'
+    ]);
+  });
+
+  it('leaves a list that already alternates untouched', () => {
+    const recs = recommend([row('S1', [9, 8, 7, 6, 5, 0]), row('F1', [0, 0, 0, 0, 0, 0])], SIX);
+    expect(diversifyRecommendations(recs)).toEqual(recs);
+  });
+
+  it('keeps the relative order inside a verdict', () => {
+    const recs = recommend(
+      [
+        row('Big', [9, 8, 7, 6, 5, 0]),
+        row('Mid', [8, 7, 6, 5, 4, 0]),
+        row('Small', [3, 2, 1, 1, 1, 0]),
+        row('Blind', [0, 0, 0, 0, 0, 0])
+      ],
+      SIX
+    );
+    const sherpas = diversifyRecommendations(recs)
+      .filter((r) => r.kind === 'sherpa')
+      .map((r) => r.activity);
+    expect(sherpas).toEqual(['Big', 'Mid', 'Small']);
+  });
+
+  it('drops nothing and invents nothing', () => {
+    const recs = recommend(
+      [
+        row('S1', [9, 8, 7, 6, 5, 0]),
+        row('S2', [8, 7, 6, 5, 4, 0]),
+        row('S3', [7, 6, 5, 4, 3, 0]),
+        row('F1', [0, 0, 0, 0, 0, 0]),
+        row('P1', [9, 9, 9, 9, 9, 9])
+      ],
+      SIX
+    );
+    const out = diversifyRecommendations(recs);
+    expect(out).toHaveLength(recs.length);
+    expect([...out].sort((a, b) => a.activity.localeCompare(b.activity))).toEqual(
+      [...recs].sort((a, b) => a.activity.localeCompare(b.activity))
+    );
+  });
+
+  it('still shows everything when every verdict is the same', () => {
+    const recs = recommend(
+      [
+        row('S1', [9, 8, 7, 6, 5, 0]),
+        row('S2', [8, 7, 6, 5, 4, 0]),
+        row('S3', [7, 6, 5, 4, 3, 0])
+      ],
+      SIX
+    );
+    expect(diversifyRecommendations(recs)).toHaveLength(3);
+  });
+
+  it('honours a custom cap', () => {
+    const recs = recommend(
+      [
+        row('S1', [9, 8, 7, 6, 5, 0]),
+        row('S2', [8, 7, 6, 5, 4, 0]),
+        row('F1', [0, 0, 0, 0, 0, 0])
+      ],
+      SIX
+    );
+    expect(kinds(diversifyRecommendations(recs, { maxConsecutive: 1 }))).toEqual([
+      'sherpa',
+      'first',
+      'sherpa'
+    ]);
+  });
+
+  it('is a no-op on an empty list', () => {
+    expect(diversifyRecommendations([])).toEqual([]);
+  });
+
+  it('does not change which verdict any activity got', () => {
+    const recs = recommend(
+      [row('S1', [9, 8, 7, 6, 5, 0]), row('S2', [8, 7, 6, 5, 4, 0]), row('F1', [0, 0, 0, 0, 0, 0])],
+      SIX
+    );
+    const before = new Map(recs.map((r) => [r.activity, r.kind]));
+    for (const r of diversifyRecommendations(recs)) {
+      expect(r.kind).toBe(before.get(r.activity));
+    }
+  });
+});
+
+describe('tallyKinds', () => {
+  it('counts each verdict in priority order', () => {
+    const recs = recommend(
+      [
+        row('S1', [9, 8, 7, 6, 5, 0]),
+        row('S2', [8, 7, 6, 5, 4, 0]),
+        row('F1', [0, 0, 0, 0, 0, 0]),
+        row('P1', [9, 9, 9, 9, 9, 9])
+      ],
+      SIX
+    );
+    expect(tallyKinds(recs)).toEqual([
+      ['sherpa', 2],
+      ['first', 1],
+      ['speedrun', 1]
+    ]);
+  });
+
+  it('is empty for an empty list', () => {
+    expect(tallyKinds([])).toEqual([]);
+  });
+});
+
+describe('tallyLabel', () => {
+  it('uses the singular for one', () => {
+    expect(tallyLabel('sherpa', 1)).toBe('sherpa run');
+    expect(tallyLabel('first', 1)).toBe('blind run');
+    expect(tallyLabel('speedrun', 1)).toBe('speedrun');
+  });
+
+  it('uses the plural for anything else', () => {
+    expect(tallyLabel('sherpa', 3)).toBe('sherpa runs');
+    expect(tallyLabel('rusty', 2)).toBe('rusty runs');
+    expect(tallyLabel('lopsided', 0)).toBe('lopsided runs');
   });
 });

@@ -1,7 +1,14 @@
 /** Renders the ranked list of things to run tonight. */
 
 import { el } from './dom';
-import { KIND_LABEL, RANKING_EXPLANATION, type Recommendation } from '../recommend';
+import {
+  diversifyRecommendations,
+  KIND_LABEL,
+  RANKING_EXPLANATION,
+  tallyKinds,
+  tallyLabel,
+  type Recommendation
+} from '../recommend';
 import type { ActivityCategory } from '../types';
 
 const CATEGORY_TAG: Record<ActivityCategory, string> = {
@@ -25,8 +32,23 @@ export function renderRecommendations(recs: Recommendation[]): DocumentFragment 
     return frag;
   }
 
+  // Tally first, off the ranked list, so the range of verdicts is visible
+  // without having to scroll the cards.
+  const tally = tallyKinds(recs);
+  frag.append(
+    el(
+      'p',
+      { class: 'rec-tally' },
+      ...tally.flatMap(([kind, count], i) => [
+        i > 0 ? el('span', { class: 'sep', text: '/' }) : null,
+        el('span', { class: 'kind-' + kind }, el('b', { text: String(count) }), ' ' + tallyLabel(kind, count))
+      ])
+    )
+  );
+
+  const ordered = diversifyRecommendations(recs);
   const list = el('div', { class: 'recs' });
-  recs.forEach((rec, i) => {
+  ordered.forEach((rec, i) => {
     const secondary = rec.flags.filter((f) => f !== rec.kind);
     list.append(
       el(

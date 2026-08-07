@@ -244,8 +244,90 @@ export function recommend(
   return typeof options.limit === 'number' ? out.slice(0, options.limit) : out;
 }
 
+export interface DiversifyOptions {
+  /** How many of the same verdict may appear in a row. */
+  maxConsecutive?: number;
+}
+
+/** Default cap on a run of identical verdicts in the displayed list. */
+export const MAX_CONSECUTIVE_KIND = 2;
+
+/**
+ * Display order. Keeps the ranking from `recommend` but refuses to show more
+ * than `maxConsecutive` of the same verdict in a row, pulling the next
+ * different verdict up instead.
+ *
+ * This is deliberately separate from `recommend`, which stays a strict
+ * priority sort. The reason for reordering is that a fireteam runs one thing
+ * tonight, so the fourth best sherpa run carries almost no information the
+ * first one did not already give, while the best speedrun carries new
+ * information. Breaking up runs raises how much the visible part of the list
+ * actually tells you. It never changes which activities are recommended or
+ * what verdict each one gets, and relative order inside a verdict is
+ * preserved, so nothing is reranked on the quiet.
+ */
+export function diversifyRecommendations(
+  recs: Recommendation[],
+  options: DiversifyOptions = {}
+): Recommendation[] {
+  const maxConsecutive = options.maxConsecutive ?? MAX_CONSECUTIVE_KIND;
+  if (maxConsecutive < 1 || recs.length === 0) return [...recs];
+
+  const pool = [...recs];
+  const out: Recommendation[] = [];
+  let lastKind: RecommendationKind | null = null;
+  let run = 0;
+
+  while (pool.length > 0) {
+    let index = 0;
+    if (lastKind !== null && run >= maxConsecutive) {
+      const alternative = pool.findIndex((r) => r.kind !== lastKind);
+      // If everything left is the same verdict, show it rather than drop it.
+      if (alternative !== -1) index = alternative;
+    }
+    const [picked] = pool.splice(index, 1);
+    if (picked.kind === lastKind) run += 1;
+    else {
+      lastKind = picked.kind;
+      run = 1;
+    }
+    out.push(picked);
+  }
+
+  return out;
+}
+
+/**
+ * Short nouns for the tally line, singular and plural. "Blind run" is already
+ * the wording used in the everyone's-first reason, so the tally does not
+ * introduce a second name for the same thing.
+ */
+export const KIND_NOUN: Record<RecommendationKind, [string, string]> = {
+  sherpa: ['sherpa run', 'sherpa runs'],
+  first: ['blind run', 'blind runs'],
+  speedrun: ['speedrun', 'speedruns'],
+  rusty: ['rusty run', 'rusty runs'],
+  lopsided: ['lopsided run', 'lopsided runs']
+};
+
+/** "3 sherpa runs", "1 blind run". */
+export function tallyLabel(kind: RecommendationKind, count: number): string {
+  const [one, many] = KIND_NOUN[kind];
+  return count === 1 ? one : many;
+}
+
+/** How many of each verdict were found, in priority order. */
+export function tallyKinds(recs: Recommendation[]): [RecommendationKind, number][] {
+  const counts = new Map<RecommendationKind, number>();
+  for (const rec of recs) counts.set(rec.kind, (counts.get(rec.kind) ?? 0) + 1);
+  return [...counts.entries()].sort((a, b) => KIND_PRIORITY[a[0]] - KIND_PRIORITY[b[0]]);
+}
+
 /** Shown in the UI so the ordering is not a black box. */
 export const RANKING_EXPLANATION =
   'Sherpa runs rank first because carrying one person to their first clear is ' +
   'the best thing a full fireteam can do with an evening. Everyone-first runs ' +
-  'come next, then speedruns. Rusty and lopsided are warnings, not suggestions.';
+  'come next, then speedruns. Rusty and lopsided are warnings, not suggestions. ' +
+  'Where a run of the same verdict would repeat more than twice, the next ' +
+  'different verdict is shown instead, so the list does not turn into one note ' +
+  'played over and over.';
