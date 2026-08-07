@@ -1,0 +1,22 @@
+{
+  "name": "fireteam-report",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Destiny 2 fireteam planner: what should we run tonight.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "derive": "node scripts/derive-activities.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.4"
+  }
+}

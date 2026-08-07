@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: test and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Check for non-ascii characters
+        run: |
+          if LC_ALL=C grep -rnP '[^\x09\x20-\x7e]' . \
+              --exclude-dir=node_modules \
+              --exclude-dir=dist \
+              --exclude-dir=.git; then
+            echo "Non-ascii characters found. See the matches above."
+            exit 1
+          fi
+          echo "All files are ascii."

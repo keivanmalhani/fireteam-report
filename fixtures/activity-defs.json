@@ -1,0 +1,865 @@
+{
+  "manifestVersion": "244213.26.06.29.2000-1-bnet.65583",
+  "definitions": [
+    {
+      "hash": 89727599,
+      "displayProperties": {
+        "name": "Leviathan"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 107319834,
+      "displayProperties": {
+        "name": "Crota's End: Standard"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 119944200,
+      "displayProperties": {
+        "name": "Leviathan, Spire of Stars: Normal"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 156253568,
+      "displayProperties": {
+        "name": "Crota's End: Legend"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 287649202,
+      "displayProperties": {
+        "name": "Leviathan"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 313828469,
+      "displayProperties": {
+        "name": "Ghosts of the Deep: Standard"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 417231112,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 508802457,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 548750096,
+      "displayProperties": {
+        "name": "Scourge of the Past"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 757116822,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 771164842,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 785700673,
+      "displayProperties": {
+        "name": "Pit of Heresy: Master"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 785700678,
+      "displayProperties": {
+        "name": "Pit of Heresy: Expert"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 809170886,
+      "displayProperties": {
+        "name": "Leviathan, Eater of Worlds: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 910380154,
+      "displayProperties": {
+        "name": "Deep Stone Crypt"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 940375169,
+      "displayProperties": {
+        "name": "Salvation's Edge: Standard"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 960175301,
+      "displayProperties": {
+        "name": "Crown of Sorrow: Normal"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1042180643,
+      "displayProperties": {
+        "name": "Garden of Salvation"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1063970578,
+      "displayProperties": {
+        "name": "King's Fall: Expert"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1077850348,
+      "displayProperties": {
+        "name": "Prophecy"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 1112917203,
+      "displayProperties": {
+        "name": "Grasp of Avarice: Master"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 1262462921,
+      "displayProperties": {
+        "name": "Spire of the Watcher: Standard"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 1374392663,
+      "displayProperties": {
+        "name": "King's Fall: Standard"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1375089621,
+      "displayProperties": {
+        "name": "Pit of Heresy: Normal"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 1441982566,
+      "displayProperties": {
+        "name": "Vow of the Disciple: Standard"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1485585878,
+      "displayProperties": {
+        "name": "Vault of Glass: Challenge Mode"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1507509200,
+      "displayProperties": {
+        "name": "Crota's End: Master"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1541433876,
+      "displayProperties": {
+        "name": "Salvation's Edge: Standard"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1566480315,
+      "displayProperties": {
+        "name": "Crota's End: Standard"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1661734046,
+      "displayProperties": {
+        "name": "Last Wish: Normal"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1685065161,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1699948563,
+      "displayProperties": {
+        "name": "Leviathan"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1754635208,
+      "displayProperties": {
+        "name": "Equilibrium: Contest"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 1800508819,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 1875726950,
+      "displayProperties": {
+        "name": "Leviathan"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2004855007,
+      "displayProperties": {
+        "name": "Warlord's Ruin: Standard"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 2032534090,
+      "displayProperties": {
+        "name": "The Shattered Throne"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 2122313384,
+      "displayProperties": {
+        "name": "Last Wish: Standard"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2164432138,
+      "displayProperties": {
+        "name": "Leviathan, Eater of Worlds"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2192826039,
+      "displayProperties": {
+        "name": "Salvation's Edge"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2214608156,
+      "displayProperties": {
+        "name": "Last Wish: Level 58"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2214608157,
+      "displayProperties": {
+        "name": "Last Wish: Level 55"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2296818662,
+      "displayProperties": {
+        "name": "Spire of the Watcher: Master"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 2381413764,
+      "displayProperties": {
+        "name": "Root of Nightmares: Standard"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2449714930,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2534833093,
+      "displayProperties": {
+        "name": "Warlord's Ruin: Master"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 2559374368,
+      "displayProperties": {
+        "name": "Pit of Heresy: Legend"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 2559374374,
+      "displayProperties": {
+        "name": "Pit of Heresy: Master"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 2559374375,
+      "displayProperties": {
+        "name": "Pit of Heresy: Master"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 2582501063,
+      "displayProperties": {
+        "name": "Pit of Heresy: Standard"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 2693136600,
+      "displayProperties": {
+        "name": "Leviathan: Normal"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2693136601,
+      "displayProperties": {
+        "name": "Leviathan: Normal"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2693136602,
+      "displayProperties": {
+        "name": "Leviathan: Normal"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2693136603,
+      "displayProperties": {
+        "name": "Leviathan: Normal"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2693136604,
+      "displayProperties": {
+        "name": "Leviathan: Normal"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2693136605,
+      "displayProperties": {
+        "name": "Leviathan: Normal"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2716998124,
+      "displayProperties": {
+        "name": "Ghosts of the Deep: Master"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 2727361621,
+      "displayProperties": {
+        "name": "Equilibrium: Standard"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 2812525063,
+      "displayProperties": {
+        "name": "Scourge of the Past"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2823159265,
+      "displayProperties": {
+        "name": "Duality: Standard"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 2906950631,
+      "displayProperties": {
+        "name": "Vow of the Disciple"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 2918919505,
+      "displayProperties": {
+        "name": "Root of Nightmares: Master"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3004605630,
+      "displayProperties": {
+        "name": "Leviathan, Spire of Stars"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3012587626,
+      "displayProperties": {
+        "name": "Duality: Master"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 3022541210,
+      "displayProperties": {
+        "name": "Vault of Glass: Master"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3089205900,
+      "displayProperties": {
+        "name": "Leviathan, Eater of Worlds: Normal"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3213556450,
+      "displayProperties": {
+        "name": "Leviathan, Spire of Stars: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3257594522,
+      "displayProperties": {
+        "name": "King's Fall: Master"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3333172150,
+      "displayProperties": {
+        "name": "Crown of Sorrow: Normal"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3446541099,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3857338478,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3879860661,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3881495763,
+      "displayProperties": {
+        "name": "Vault of Glass: Standard"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3889634515,
+      "displayProperties": {
+        "name": "Vow of the Disciple: Master"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3912437239,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 3916343513,
+      "displayProperties": {
+        "name": "Leviathan"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 4039317196,
+      "displayProperties": {
+        "name": "Leviathan"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 4078656646,
+      "displayProperties": {
+        "name": "Grasp of Avarice: Standard"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 4129614942,
+      "displayProperties": {
+        "name": "Salvation's Edge: Master"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 4148187374,
+      "displayProperties": {
+        "name": "Prophecy"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 4169648176,
+      "displayProperties": {
+        "name": "The Pantheon: Oryx Exalted"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 4169648177,
+      "displayProperties": {
+        "name": "The Pantheon: Rhulk Indomitable"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 4169648179,
+      "displayProperties": {
+        "name": "The Pantheon: Atraks Sovereign"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 4169648182,
+      "displayProperties": {
+        "name": "The Pantheon: Nezarec Sublime"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    },
+    {
+      "hash": 4179289725,
+      "displayProperties": {
+        "name": "Crota's End: Normal"
+      },
+      "activityModeTypes": [
+        7,
+        82
+      ]
+    },
+    {
+      "hash": 4206123728,
+      "displayProperties": {
+        "name": "Leviathan: Prestige"
+      },
+      "activityModeTypes": [
+        4,
+        7
+      ]
+    }
+  ]
+}
