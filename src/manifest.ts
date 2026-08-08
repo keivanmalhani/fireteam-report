@@ -9,12 +9,14 @@
  *
  * The manifest endpoint itself works without an API key, but it answers with
  * ApiKeyMissingFromRequest often enough to matter, so requests are retried and
- * the key is attached when the user has one. If everything fails, the committed
- * fallback table is used and the caller is told the list is a snapshot.
+ * the site's own key is attached to every one of them. If everything fails, the
+ * committed fallback table is used and the caller is told the list is a
+ * snapshot.
  */
 
 import { collapseActivities } from './activities';
-import { getApiKey, STORAGE_KEY_MANIFEST } from './bungie';
+import { API_KEY } from './auth';
+import { STORAGE_KEY_MANIFEST } from './bungie';
 import { FALLBACK_ACTIVITIES, FALLBACK_MANIFEST_VERSION } from './fallback-activities';
 import type { ActivityGroup, RawActivityDef } from './types';
 
@@ -164,7 +166,7 @@ async function fetchJson<T>(
  * network, then the committed snapshot. Never throws.
  */
 export async function loadActivityCatalog(): Promise<ActivityCatalog> {
-  const key = getApiKey();
+  const key = API_KEY;
   const cached = readCache();
 
   let version: string;

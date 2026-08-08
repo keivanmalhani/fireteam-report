@@ -1,10 +1,11 @@
 /**
  * Demo mode.
  *
- * A visitor with no API key still sees the whole product working, using an
- * invented fireteam committed to the repo. This is deliberate: asking someone
- * to register for an API key before they know what the site does is a good way
- * to have them close the tab.
+ * A visitor who has done nothing at all still sees the whole product working,
+ * using an invented fireteam committed to the repo. The key dialog this used to
+ * excuse is gone, but the reason to open on a working page is not: nobody
+ * should have to sign in, name a clan or spend the shared rate limit before
+ * they know what the site does.
  */
 
 import demoData from '../fixtures/demo.json';

@@ -393,7 +393,7 @@ table.matrix tbody tr:hover td { background-color: #171b22; }
   font-size: 0.79rem;
 }
 
-/* ---------- key explainer / dialog ---------- */
+/* ---------- dialogs ---------- */
 
 dialog {
   border: 1px solid var(--line);
@@ -405,6 +405,7 @@ dialog {
   width: calc(100vw - 32px);
 }
 dialog::backdrop { background: rgba(5, 6, 9, 0.74); }
+#clan-dialog { max-width: 620px; }
 .dlg-head { padding: 20px 22px 0; }
 .dlg-head h2 { font-size: 1.16rem; }
 .dlg-body { padding: 12px 22px 4px; color: var(--text-dim); font-size: 0.9rem; }
@@ -485,3 +486,137 @@ footer.foot .row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: s
 .rec-tally > span { color: var(--kind, var(--text-faint)); white-space: nowrap; }
 .rec-tally b { font-weight: 600; font-variant-numeric: tabular-nums; }
 .rec-tally .sep { color: var(--line); }
+
+
+/* ---------- sign-in ---------- */
+
+.account { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.account-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.account-note {
+  font-size: 0.76rem; color: var(--text-faint);
+  max-width: 34ch; text-align: right; line-height: 1.4;
+}
+
+/* ---------- the answer ---------- */
+
+/* One sentence, before any card or number. If a reader stops here they still
+   have an answer, which is the whole reorganisation in one rule. */
+.headline {
+  margin-top: 16px;
+  font-size: 1.32rem;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+  max-width: 30ch;
+}
+
+.rec.hero {
+  display: block;
+  margin-top: 14px;
+  padding: 22px 24px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--kind, var(--accent));
+  border-radius: var(--radius);
+  background: linear-gradient(100deg, var(--accent-soft), rgba(0, 0, 0, 0) 58%), var(--surface);
+}
+.hero-verdict {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.09em;
+  color: var(--kind, var(--accent)); font-weight: 600;
+}
+.hero-name { font-size: 1.9rem; line-height: 1.15; margin-top: 4px; }
+.hero-reason { margin-top: 8px; color: var(--text-dim); font-size: 0.95rem; max-width: 62ch; }
+.hero-tags { margin-top: 12px; display: flex; gap: 7px; flex-wrap: wrap; }
+
+.runners { margin-top: 26px; }
+.runners .recs { margin-top: 8px; }
+
+/* ---------- disclosures ---------- */
+
+details.rank-details, details.matrix-details { border-top: 1px solid var(--line-soft); }
+details.rank-details { margin-top: 26px; padding-top: 12px; }
+details summary {
+  cursor: pointer; list-style: none;
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  padding: 10px 0; color: var(--text-dim); font-size: 0.9rem;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::before {
+  content: "+"; font-family: var(--mono); color: var(--text-faint);
+  width: 1em; display: inline-block;
+}
+details[open] summary::before { content: "-"; }
+details summary:hover { color: var(--text); }
+details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.summary-title { font-size: 1.05rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.summary-hint { font-size: 0.78rem; color: var(--text-faint); }
+details.rank-details .rec-tally { margin-top: 4px; }
+
+/* ---------- clan picker ---------- */
+
+.clan-mine { display: flex; gap: 8px; margin: 14px 0 18px; flex-wrap: wrap; }
+.clan-find { display: flex; gap: 8px; margin-top: 6px; }
+.clan-find input {
+  flex: 1 1 auto; min-width: 0; margin-top: 0;
+  font-family: var(--font); font-size: 0.9rem;
+}
+.clan-find .btn { flex: 0 0 auto; }
+
+.clan-list { display: grid; gap: 7px; margin-top: 14px; }
+.clan-hit {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  text-align: left; cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--radius-sm); color: var(--text);
+  font: inherit; padding: 10px 13px;
+}
+.clan-hit:hover { border-color: var(--accent-line); background: var(--surface-3); }
+.clan-hit:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.clan-hit-name { font-weight: 600; }
+.clan-hit-meta { font-size: 0.78rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.clan-hit-motto {
+  flex: 1 1 100%; font-size: 0.78rem; color: var(--text-faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.roster-head { display: flex; align-items: center; gap: 10px; margin: 16px 0 6px; }
+.roster-head .spacer { flex: 1 1 auto; }
+/* Capped rather than scrolling forever: a hundred names is a lot of dialog. */
+.roster {
+  max-height: 46vh; overflow-y: auto;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+.roster-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px; cursor: pointer;
+  border-bottom: 1px solid var(--line-soft);
+}
+.roster-row:last-child { border-bottom: none; }
+.roster-row:hover { background: var(--surface-2); }
+.roster-row input { width: 15px; height: 15px; accent-color: var(--accent); flex: 0 0 auto; margin: 0; }
+.roster-who { flex: 1 1 auto; min-width: 0; display: flex; align-items: baseline; gap: 2px; }
+.roster-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.9rem; }
+.roster-code { font-family: var(--mono); font-size: 0.75rem; color: var(--text-faint); }
+.roster-tag { flex: 0 0 auto; font-size: 0.72rem; color: var(--text-faint); }
+.roster-row.is-online .roster-tag { color: var(--ok); }
+
+.form-msg .is-error { color: var(--bad); }
+
+@media (max-width: 700px) {
+  /* The masthead stacks on a phone, so the sign-in block reads left to right
+     with everything else rather than hugging an edge that is no longer there. */
+  .account { align-items: flex-start; }
+  .account-note { text-align: left; max-width: none; }
+  .headline { font-size: 1.16rem; }
+  .hero-name { font-size: 1.5rem; }
+  .rec.hero { padding: 18px 16px; }
+  .roster { max-height: 40vh; }
+}
+
+/* The activity list note sits under the folded grid it describes. */
+#catalog-note { margin-top: 10px; }
+
+/* The overflow of the ranked list, folded but still numbered in sequence. */
+details.more-recs { margin-top: 8px; }
+details.more-recs > summary { padding: 8px 0; font-size: 0.84rem; }
+details.more-recs .recs { margin-top: 4px; }

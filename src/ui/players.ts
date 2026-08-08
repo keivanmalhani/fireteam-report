@@ -3,7 +3,13 @@
  *
  * Two to six players. Every slot is validated locally before anything is
  * fetched, because a typo should cost nothing and a bad Bungie Name should not
- * consume a request against the user's rate limit.
+ * consume a request against a rate limit that is shared with everyone else
+ * using the site.
+ *
+ * Typing names still works with nothing set up, and that is the point: building
+ * a fireteam out of your friends means naming people who are not you. The two
+ * shortcuts next to the button, "Add me" and "Load a clan", exist because
+ * typing six of these correctly is the thing people give up on.
  */
 
 import { describeNameError, parseBungieName } from '../bungiename';
@@ -33,6 +39,13 @@ export function createPlayerForm(handlers: PlayerFormHandlers): PlayerForm {
   const slots = el('div', { class: 'slots' });
   const message = el('p', { class: 'form-msg' });
   const addBtn = el('button', { type: 'button', class: 'btn btn-sm', text: 'Add player' });
+  const meBtn = el('button', { type: 'button', class: 'btn btn-sm', id: 'add-me', text: 'Add me' });
+  const clanBtn = el('button', {
+    type: 'button',
+    class: 'btn btn-sm',
+    id: 'open-clan',
+    text: 'Load a clan'
+  });
   const runBtn = el('button', { type: 'button', class: 'btn btn-primary', text: 'Build the report' });
 
   const root = el(
@@ -44,6 +57,8 @@ export function createPlayerForm(handlers: PlayerFormHandlers): PlayerForm {
       'div',
       { class: 'team-actions' },
       addBtn,
+      meBtn,
+      clanBtn,
       el('span', { class: 'spacer' }),
       message,
       runBtn

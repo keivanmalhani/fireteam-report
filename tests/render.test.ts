@@ -13,8 +13,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount, toMatrixRows } from '../src/ui/app';
 import { renderMatrix, heatClass } from '../src/ui/matrix';
 import { renderSummaries } from '../src/ui/summary';
-import { renderRecommendations } from '../src/ui/recommendations';
-import { recommend } from '../src/recommend';
+import { renderRecommendations, VISIBLE_RUNNERS_UP } from '../src/ui/recommendations';
+import { diversifyRecommendations, headline, recommend } from '../src/recommend';
 import { FALLBACK_ACTIVITIES } from '../src/fallback-activities';
 import { demoPlayers } from '../src/demo';
 import realDefs from '../fixtures/activity-defs.json';
@@ -68,8 +68,25 @@ async function mountApp(): Promise<HTMLElement> {
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   stubNetwork();
 });
+
+/**
+ * A session exactly as d2-auth writes it. Seeding storage is the whole of
+ * "being signed in" as far as this site is concerned, which is the point of
+ * keeping the sign-in itself in another repository.
+ */
+function seedSession(minutes = 42): void {
+  sessionStorage.setItem(
+    'd2.session',
+    JSON.stringify({
+      accessToken: 'seeded-token',
+      expiresAt: Date.now() + minutes * 60_000 + 60_000,
+      membershipId: '4583459'
+    })
+  );
+}
 
 describe('heatClass', () => {
   it('maps counts onto the ramp', () => {
@@ -157,25 +174,222 @@ describe('renderRecommendations', () => {
       players.map((p) => p.ref.name)
     );
     const host = document.createElement('div');
-    host.append(renderRecommendations(recs));
+    host.append(renderRecommendations(recs, players.length));
     expect(host.querySelectorAll('.rec')).toHaveLength(recs.length);
     expect(host.querySelector('.rank-note')).not.toBeNull();
+  });
+
+  it('leads with one sentence, before any card or tag', () => {
+    const players = demoPlayers();
+    const recs = recommend(
+      toMatrixRows(FALLBACK_ACTIVITIES, players),
+      players.map((p) => p.ref.name)
+    );
+    const host = document.createElement('div');
+    host.append(renderRecommendations(recs, players.length));
+    const line = host.querySelector('.headline');
+    expect(line?.textContent).toBe(headline(diversifyRecommendations(recs), players.length));
+    // It is the first thing in the section, or it is not a headline.
+    expect(host.firstElementChild).toBe(line);
+  });
+
+  it('gives the top pick a card of its own and calls the rest runners up', () => {
+    const players = demoPlayers();
+    const recs = recommend(
+      toMatrixRows(FALLBACK_ACTIVITIES, players),
+      players.map((p) => p.ref.name)
+    );
+    const host = document.createElement('div');
+    host.append(renderRecommendations(recs, players.length));
+    const hero = host.querySelector('.rec.hero');
+    expect(hero).not.toBeNull();
+    expect(hero?.querySelector('.hero-name')?.textContent).toBe(
+      diversifyRecommendations(recs)[0].activity
+    );
+    expect(host.querySelectorAll('.rec.hero')).toHaveLength(1);
+    // Nothing is dropped, only folded.
+    expect(host.querySelectorAll('.runners .rec')).toHaveLength(recs.length - 1);
+  });
+
+  it('shows a handful of runners up and folds the long tail away', () => {
+    const players = demoPlayers();
+    const recs = recommend(
+      toMatrixRows(FALLBACK_ACTIVITIES, players),
+      players.map((p) => p.ref.name)
+    );
+    expect(recs.length).toBeGreaterThan(VISIBLE_RUNNERS_UP + 1);
+    const host = document.createElement('div');
+    host.append(renderRecommendations(recs, players.length));
+    expect(host.querySelectorAll('.runners > .recs > .rec')).toHaveLength(VISIBLE_RUNNERS_UP);
+    const more = host.querySelector('details.more-recs');
+    expect((more as HTMLDetailsElement).open).toBe(false);
+    expect(more?.querySelectorAll('.rec')).toHaveLength(recs.length - 1 - VISIBLE_RUNNERS_UP);
+    expect(more?.querySelector('summary')?.textContent).toBe(
+      recs.length - 1 - VISIBLE_RUNNERS_UP + ' more options, ranked lower'
+    );
+  });
+
+  it('numbers the folded ones as a continuation, not a new list', () => {
+    const players = demoPlayers();
+    const recs = recommend(
+      toMatrixRows(FALLBACK_ACTIVITIES, players),
+      players.map((p) => p.ref.name)
+    );
+    const host = document.createElement('div');
+    host.append(renderRecommendations(recs, players.length));
+    const ranks = [...host.querySelectorAll('.runners .rec-rank')].map((n) => n.textContent);
+    expect(ranks[0]).toBe('2');
+    expect(ranks[ranks.length - 1]).toBe(String(recs.length));
+  });
+
+  it('does not offer a disclosure when there is no tail to hide', () => {
+    const recs = recommend(
+      [
+        { activity: 'Vault of Glass', category: 'raid' as const, counts: [0, 4] },
+        { activity: 'Last Wish', category: 'raid' as const, counts: [9, 8] }
+      ],
+      ['Ana', 'Rob']
+    );
+    const host = document.createElement('div');
+    host.append(renderRecommendations(recs, 2));
+    expect(host.querySelector('details.more-recs')).toBeNull();
+  });
+
+  it('folds the ranking rules away rather than putting them before the answer', () => {
+    const players = demoPlayers();
+    const recs = recommend(
+      toMatrixRows(FALLBACK_ACTIVITIES, players),
+      players.map((p) => p.ref.name)
+    );
+    const host = document.createElement('div');
+    host.append(renderRecommendations(recs, players.length));
+    const details = host.querySelector('details.rank-details');
+    expect(details).not.toBeNull();
+    expect((details as HTMLDetailsElement).open).toBe(false);
+    expect(details?.querySelector('.rank-note')).not.toBeNull();
+    expect(details?.querySelector('.rec-tally')).not.toBeNull();
   });
 
   it('says so plainly when nothing stands out', () => {
     const host = document.createElement('div');
     host.append(renderRecommendations([]));
     expect(host.querySelector('.empty')?.textContent).toContain('Nothing stands out');
+    expect(host.querySelector('.headline')?.textContent).toContain('whatever you feel like');
   });
 });
 
 describe('mounting the whole app', () => {
-  it('renders the demo fireteam when there is no API key', async () => {
+  it('renders the demo fireteam with nobody signed in', async () => {
     const root = await mountApp();
     expect(root.querySelector('#mode-pill')?.textContent).toContain('Demo mode');
     expect(root.querySelectorAll('.pcard')).toHaveLength(6);
     expect(root.querySelectorAll('.rec').length).toBeGreaterThan(0);
     expect(root.querySelector('table.matrix')).not.toBeNull();
+  });
+
+  it('never asks anybody for an API key', async () => {
+    // This used to be a dialog with a seven step recipe in it. Nothing that
+    // asks a reader to go and create a credential may come back.
+    await mountApp();
+    const page = document.body;
+    expect(page.querySelector('#apikey-input')).toBeNull();
+    expect(page.querySelector('#key-dialog')).toBeNull();
+    expect(page.querySelector('#open-key')).toBeNull();
+    expect(page.querySelector('input[type=password]')).toBeNull();
+    expect(page.textContent ?? '').not.toMatch(/API key|bungie\.net\/en\/Application|Create New App/i);
+  });
+
+  it('offers one button instead, and it is the sign-in', async () => {
+    const root = await mountApp();
+    const button = root.querySelector('#sign-in');
+    expect(button?.textContent).toBe('Sign in with Bungie');
+    expect((button as HTMLButtonElement).hidden).toBe(false);
+    expect((root.querySelector('#sign-out') as HTMLButtonElement).hidden).toBe(true);
+    expect((root.querySelector('#add-me') as HTMLButtonElement).hidden).toBe(true);
+    expect(root.querySelector('#session-note')?.textContent).toContain('Sign in to add yourself');
+  });
+
+  it('shows the session and its shortcuts once there is one', async () => {
+    seedSession(42);
+    const root = await mountApp();
+    expect((root.querySelector('#sign-in') as HTMLButtonElement).hidden).toBe(true);
+    expect((root.querySelector('#sign-out') as HTMLButtonElement).hidden).toBe(false);
+    expect((root.querySelector('#add-me') as HTMLButtonElement).hidden).toBe(false);
+    const note = root.querySelector('#session-note')?.textContent ?? '';
+    expect(note).toContain('Signed in');
+    expect(note).toMatch(/4[12] minutes/);
+    expect(note).toContain('cannot be renewed');
+  });
+
+  it('drops the session shortcuts again when it has expired', async () => {
+    // An hour old session is not a session. auth.ts refuses to hand it back,
+    // and the page must not offer buttons that only work with one.
+    sessionStorage.setItem(
+      'd2.session',
+      JSON.stringify({ accessToken: 't', expiresAt: Date.now() - 1000, membershipId: '1' })
+    );
+    const root = await mountApp();
+    expect((root.querySelector('#sign-in') as HTMLButtonElement).hidden).toBe(false);
+    expect((root.querySelector('#add-me') as HTMLButtonElement).hidden).toBe(true);
+  });
+
+  it('lets a clan be loaded, signed in or not', async () => {
+    await mountApp();
+    const dialog = document.querySelector('#clan-dialog');
+    expect(document.querySelector('#open-clan')?.textContent).toBe('Load a clan');
+    expect(dialog).not.toBeNull();
+    expect(dialog?.querySelector('#clan-name')).not.toBeNull();
+    expect(dialog?.querySelector('#clan-search')).not.toBeNull();
+    // Signed out, the one-click path is offered as the sign-in that unlocks it.
+    expect((dialog?.querySelector('#clan-mine') as HTMLButtonElement).hidden).toBe(true);
+    expect((dialog?.querySelector('#clan-signin') as HTMLButtonElement).hidden).toBe(false);
+    expect(dialog?.textContent).toContain('needs no sign-in at all');
+  });
+
+  it('offers the clan one-click path to somebody signed in', async () => {
+    seedSession();
+    await mountApp();
+    const dialog = document.querySelector('#clan-dialog');
+    expect((dialog?.querySelector('#clan-mine') as HTMLButtonElement).hidden).toBe(false);
+    expect((dialog?.querySelector('#clan-signin') as HTMLButtonElement).hidden).toBe(true);
+  });
+
+  it('says the clan name has to be exact, because Bungie will not guess', async () => {
+    await mountApp();
+    expect(document.querySelector('#clan-dialog')?.textContent).toContain(
+      'matches the whole clan name'
+    );
+  });
+
+  it('keeps typing Bungie Names working with nothing signed in', async () => {
+    const root = await mountApp();
+    const inputs = root.querySelectorAll<HTMLInputElement>('.slot input');
+    expect(inputs).toHaveLength(2);
+    expect(inputs[0].placeholder).toBe('Guardian#1234');
+    expect(root.querySelector('.team-actions .btn-primary')?.textContent).toBe(
+      'Build the report'
+    );
+  });
+
+  it('folds the matrix away under a heading rather than leading with it', async () => {
+    const root = await mountApp();
+    const details = root.querySelector<HTMLDetailsElement>('#matrix-details');
+    expect(details).not.toBeNull();
+    expect(details?.open).toBe(false);
+    expect(details?.querySelector('summary')?.textContent).toContain('Who has cleared what');
+    // Demoted, not deleted: the whole grid is still in there.
+    expect(details?.querySelector('table.matrix')).not.toBeNull();
+    expect(details?.querySelector('.stack')).not.toBeNull();
+  });
+
+  it('puts the answer above the fold, before any table', async () => {
+    const root = await mountApp();
+    const line = root.querySelector('.headline');
+    const table = root.querySelector('table.matrix');
+    expect(line?.textContent?.length ?? 0).toBeGreaterThan(0);
+    expect(line?.compareDocumentPosition(table as Node) ?? 0).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   });
 
   it('derives the activity list from the manifest it fetched', async () => {
@@ -208,11 +422,10 @@ describe('mounting the whole app', () => {
   });
 
   it('does not write anything to localStorage beyond the manifest cache', async () => {
+    // There is nothing else to keep now. The old key lived here; the session
+    // lives in sessionStorage and is written by d2-auth, not by this site.
     await mountApp();
-    const keys = Object.keys(localStorage);
-    for (const key of keys) {
-      expect(['fireteam-report.manifest', 'fireteam-report.apikey']).toContain(key);
-    }
+    expect(Object.keys(localStorage)).toEqual(['fireteam-report.manifest']);
   });
 
   it('offers the permalink, Discord and card buttons', async () => {

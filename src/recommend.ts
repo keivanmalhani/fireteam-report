@@ -323,6 +323,36 @@ export function tallyKinds(recs: Recommendation[]): [RecommendationKind, number]
   return [...counts.entries()].sort((a, b) => KIND_PRIORITY[a[0]] - KIND_PRIORITY[b[0]]);
 }
 
+/**
+ * The whole report in one sentence, for somebody who has never seen the site.
+ *
+ * The matrix answers "who has cleared what", which is a question you have to
+ * already care about. This answers "what are we running", which is the question
+ * that made anybody open the page. It is deliberately an instruction rather
+ * than a statistic: no counts, no percentages, no jargon from the tally line.
+ */
+export function headline(recs: Recommendation[], playerCount: number): string {
+  const top = recs[0];
+  if (!top) {
+    return 'Nothing stands out for this fireteam, so run whatever you feel like.';
+  }
+  const who = top.subject ?? 'one of you';
+  switch (top.kind) {
+    case 'sherpa':
+      return 'Run ' + top.activity + ' and get ' + who + ' their first clear.';
+    case 'first':
+      return (
+        'Run ' + top.activity + '. It is new to all ' + playerCount + ' of you, so go in blind.'
+      );
+    case 'speedrun':
+      return 'Run ' + top.activity + '. Everybody knows it, so it should be a quick one.';
+    case 'rusty':
+      return 'Run ' + top.activity + ', but nobody has run it much, so give it the evening.';
+    case 'lopsided':
+      return 'Run ' + top.activity + ', and expect ' + who + ' to end up calling it.';
+  }
+}
+
 /** Shown in the UI so the ordering is not a black box. */
 export const RANKING_EXPLANATION =
   'Sherpa runs rank first because carrying one person to their first clear is ' +

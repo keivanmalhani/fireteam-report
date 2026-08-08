@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   diversifyRecommendations,
+  headline,
   isEveryonesFirst,
   isLopsided,
   isRusty,
@@ -401,5 +402,60 @@ describe('tallyLabel', () => {
     expect(tallyLabel('sherpa', 3)).toBe('sherpa runs');
     expect(tallyLabel('rusty', 2)).toBe('rusty runs');
     expect(tallyLabel('lopsided', 0)).toBe('lopsided runs');
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* the one sentence version                                            */
+/* ------------------------------------------------------------------ */
+
+describe('headline', () => {
+  const first = (rows: MatrixRow[], players = SIX) => recommend(rows, players);
+
+  it('names the person being carried, because that is the whole pitch', () => {
+    const recs = first([row('Vault of Glass', [0, 4, 6, 2, 3, 9])]);
+    expect(headline(recs, 6)).toBe('Run Vault of Glass and get Wraith their first clear.');
+  });
+
+  it('tells a fireteam of six that it is new to all six of them', () => {
+    const recs = first([row('Salvation\'s Edge', [0, 0, 0, 0, 0, 0])]);
+    expect(headline(recs, 6)).toBe(
+      "Run Salvation's Edge. It is new to all 6 of you, so go in blind."
+    );
+  });
+
+  it('promises a quick one when everybody knows it', () => {
+    const recs = first([row('Last Wish', [9, 8, 12, 7, 6, 11])]);
+    expect(headline(recs, 6)).toBe('Run Last Wish. Everybody knows it, so it should be a quick one.');
+  });
+
+  it('warns instead of selling when the top pick is a warning', () => {
+    expect(headline(first([row('Crota\'s End', [1, 1, 1, 1, 1, 1])]), 6)).toBe(
+      "Run Crota's End, but nobody has run it much, so give it the evening."
+    );
+    const lopsided = first([row('Garden of Salvation', [40, 1, 2, 1, 1, 1])]);
+    expect(headline(lopsided, 6)).toBe(
+      'Run Garden of Salvation, and expect Wraith to end up calling it.'
+    );
+  });
+
+  it('says so plainly when there is nothing to say', () => {
+    expect(headline([], 6)).toBe('Nothing stands out for this fireteam, so run whatever you feel like.');
+  });
+
+  it('is an instruction, with no counts or jargon in it', () => {
+    // The matrix is where the numbers live. This is the line somebody reads
+    // who has never seen the site before, so it has to survive on its own.
+    const recs = first([row('Vault of Glass', [0, 4, 6, 2, 3, 9])]);
+    const line = headline(recs, 6);
+    expect(line.startsWith('Run ')).toBe(true);
+    expect(line).not.toMatch(/clears|sherpa|speedrun|lopsided|matrix|%/i);
+  });
+
+  it('reads the list it is given, so the displayed order and the sentence agree', () => {
+    const recs = diversifyRecommendations(
+      first([row('Last Wish', [9, 8, 12, 7, 6, 11]), row('Vault of Glass', [0, 4, 6, 2, 3, 9])])
+    );
+    expect(headline(recs, 6)).toContain(recs[0].activity);
   });
 });
